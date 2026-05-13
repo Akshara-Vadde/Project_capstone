@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+        <div class="container" id="container">
+
+        <!-- Login Form -->
+        <div class="form-box login">
+            <h2>Login</h2>
+        <form action="/login" method="POST">
+            <div class="input-box">
+                <input type="text" id="loginUsername" placeholder="Username" name="username" required>
+            </div>
+
+            <div class="input-box">
+                <input type="password" id="loginPassword" placeholder="Password" name="password" required>
+            </div>
+
+            <button class="btn" id="loginBtn">Login</button>
+        </form>
+        </div>
+
+        <!-- Signup Form -->
+        <div class="form-box signup">
+            <h2>Create Account</h2>
+        <form action="/adduser" method="POST">
+            <div class="input-box">
+                <input type="text" id="signupName" placeholder="Full Name" required>
+            </div>
+
+            <div class="input-box">
+                <input type="text" id="signupUsername" name="username" placeholder="Username" required>
+            </div> 
+
+            <div class="input-box">
+                <input type="password" id="signupPassword" name="password" placeholder="Password" required>
+            </div>
+
+            <button class="btn" id="signupBtn">Sign Up</button>
+        </form>
+        </div>
+
+        <!-- Toggle Panel -->
+        <div class="toggle-box">
+            <h1>Welcome!</h1>
+            <button class="toggle-btn" id="toggle">
+                Create Account
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const toggleBtn = document.getElementById('toggle');
+
+        let signupMode = false;
+
+        toggleBtn.addEventListener('click', () => {
+            signupMode = !signupMode;
+
+            container.classList.toggle('active');
+
+            if (signupMode) {
+                toggleBtn.innerText = "Back to Login";
+            } else {
+                toggleBtn.innerText = "Create Account";
+            }
+        });
+
+        // LOGIN BUTTON
+        document.getElementById("loginBtn").addEventListener("click", () => {
+
+            const username = document.getElementById("loginUsername").value;
+            const password = document.getElementById("loginPassword").value;
+
+            console.log("===== LOGIN DATA =====");
+            console.log("Username:", username);
+            console.log("Password:", password);
+        });
+
+        // SIGNUP BUTTON
+        document.getElementById("signupBtn").addEventListener("click", () => {
+
+            const name = document.getElementById("signupName").value;
+            const username = document.getElementById("signupUsername").value;
+            const password = document.getElementById("signupPassword").value;
+
+            console.log("===== SIGNUP DATA =====");
+            console.log("Name:", name);
+            console.log("Username:", username);
+            console.log("Password:", password);
+        });
+    </script>
+    
+</body>
+
+</html>
