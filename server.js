@@ -49,7 +49,7 @@ app.post("/login", async (req, res) => {
             res.json({
                     success: true,
                     userId: user._id,
-                    redirectUrl: "/sticky_notes.html"
+                    redirectUrl: "/sticky_note.html"
             });
             console.log(user._id);
         } else {

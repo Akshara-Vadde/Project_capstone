@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sticky Notes</title>
+
+    <link rel="stylesheet" href="./css/sticky.css">
+
+
+</head>
+
+<body>
+
+    <button id="add-note">➕ Add Note</button>
+    <div id="notes-container"></div>
+
+
+
+
+    <script>
+        
+    const uid = localStorage.getItem("myUserId");
+
+    if (!uid) {
+        alert("Please login first!");
+        window.location.href = "sign_up_form.html";
+    }
+
+    const addBtn = document.getElementById("add-note");
+    const container = document.getElementById("notes-container");
+
+    let notes = [];
+
+    // --- 4. UPDATE NOTE IN DATABASE ---
+   async function updateNoteInDB(id, title, content, x, y) {
+    if (id.length < 20) {
+        console.log("Waiting for real MongoDB ID...");
+        return; 
+    }
+
+    try {
+        await fetch('/updatenote', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, title, description: content, x, y })
+        });
+    } catch (err) {
+        console.error("Sync failed:", err);
+    }
+}
+
+    function createNote({ id, title, content, x = 100, y = 100 }) {
+        const noteEl = document.createElement("div");
+        noteEl.className = "note";
+        noteEl.style.left = `${x}px`;
+        noteEl.style.top = `${y}px`;
+        noteEl.dataset.id = id; 
+
+        const titleInput = document.createElement("input");
+        titleInput.className = "note-title";
+        titleInput.value = title || "New Note"; 
+        titleInput.placeholder = "Title...";
+
+        const textarea = document.createElement("textarea");
+        textarea.value = content || "";
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "delete";
+        deleteBtn.innerText = "×";
+
+        const moveIcon = document.createElement("div");
+        moveIcon.className = "move-icon";
+        moveIcon.innerText = "☰";
+
+        noteEl.appendChild(titleInput);
+        noteEl.appendChild(textarea);
+        noteEl.appendChild(deleteBtn);
+        noteEl.appendChild(moveIcon);
+        container.appendChild(noteEl);
+
+        // Title Sync
+        titleInput.addEventListener("input", () => {
+            const currentId = noteEl.dataset.id;
+            const idx = notes.findIndex((n) => n.id === currentId);
+            if (idx !== -1) {
+                notes[idx].title = titleInput.value;
+                updateNoteInDB(currentId, titleInput.value, textarea.value, notes[idx].x, notes[idx].y);
+            }
+        });
+
+        // Textarea Sync
+        textarea.addEventListener("input", () => {
+            const currentId = noteEl.dataset.id;
+            const idx = notes.findIndex((n) => n.id === currentId);
+            if (idx !== -1) {
+                notes[idx].content = textarea.value;
+                updateNoteInDB(currentId, titleInput.value, textarea.value, notes[idx].x, notes[idx].y);
+            }
+        });
+
+        // Dragging Logic
+        let offsetX, offsetY;
+        noteEl.addEventListener("mousedown", (e) => {
+            if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT" || e.target.className === "delete") return;
+            offsetX = e.offsetX;
+            offsetY = e.offsetY;
+
+            function onMouseMove(ev) {
+                noteEl.style.left = `${ev.pageX - offsetX}px`;
+                noteEl.style.top = `${ev.pageY - offsetY}px`;
+            }
+
+            function onMouseUp() {
+                const currentId = noteEl.dataset.id;
+                const idx = notes.findIndex((n) => n.id === currentId);
+                if (idx !== -1) {
+                    notes[idx].x = parseInt(noteEl.style.left);
+                    notes[idx].y = parseInt(noteEl.style.top);
+                    updateNoteInDB(currentId, titleInput.value, textarea.value, notes[idx].x, notes[idx].y);
+                }
+                document.removeEventListener("mousemove", onMouseMove);
+                document.removeEventListener("mouseup", onMouseUp);
+            }
+
+            document.addEventListener("mousemove", onMouseMove);
+            document.addEventListener("mouseup", onMouseUp);
+        });
+
+
+
+        deleteBtn.addEventListener("click", async () => {
+            const currentId = noteEl.dataset.id;
+            noteEl.remove();
+            notes = notes.filter((n) => n.id !== currentId);
+            
+            if (currentId.length === 24) {
+        try {
+            const response = await fetch(`/deletenote/${currentId}`, { 
+                method: 'DELETE' 
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                console.log("Note permanently deleted from DB");
+            }
+        } 
+        catch (err) {
+            console.error("Failed to delete note from server:", err);
+            }
+            }
+             else {
+                console.log("Temporary note removed (was never saved to DB)");
+            }
+                
+                });
+    }
+
+
+    
+    addBtn.addEventListener("click", async () => {
+    // 1. Generate temp ID and show UI immediately
+    const tempId = Date.now().toString(); 
+    const noteForUI = {
+        id: tempId, 
+        title: "New Note",
+        content: "",
+        x: 100, y: 100
+    };
+
+    notes.push(noteForUI);
+    createNote(noteForUI); 
+
+    try {
+        const response = await fetch('/addnote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title: "New Note",
+                description: "",
+                userId: uid
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // --- CRITICAL FIX ---
+            // A. Update the array
+            const noteIndex = notes.findIndex(n => n.id === tempId);
+            if (noteIndex !== -1) {
+                notes[noteIndex].id = result.note._id;
+            }
+
+            // B. Update the DOM element so the 'input' event uses the new ID
+            const element = document.querySelector(`[data-id="${tempId}"]`);
+            if (element) {
+                element.dataset.id = result.note._id;
+                console.log("ID Swapped! Now safe to type.");
+            }
+        }
+    } catch (err) {
+        console.error("Add note failed:", err);
+    }
+});
+
+
+
+    async function fetchNotes() {
+        try {
+            const response = await fetch(`/getnotes/${uid}`); 
+            const data = await response.json();
+
+            if (Array.isArray(data)) {
+                notes = data.map(n => ({
+                    id: n._id,
+                    title: n.title,
+                    content: n.description, 
+                    x: n.x || 100,
+                    y: n.y || 100
+                }));
+
+                container.innerHTML = ""; 
+                notes.forEach(note => createNote(note));
+            }
+        } catch (err) {
+            console.error("Failed to load notes:", err);
+        }
+    }
+
+    fetchNotes();
+
+    </script>
+</body>
+
+</html>
+   
