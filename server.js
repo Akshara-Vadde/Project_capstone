@@ -39,7 +39,7 @@ app.post("/login", async (req, res) => {
         const user = await UserModel.findOne({ username: username });
 
         if (!user) {
-            return res.send("User not found. Please sign up first.");
+           return res.status(404).json({ success: false, message: "User not found." });
         }
 
         // 2. Compare passwords (now await works because we aren't inside a .then)
@@ -53,7 +53,7 @@ app.post("/login", async (req, res) => {
             });
             console.log(user._id);
         } else {
-            res.send("Incorrect password. Please try again.");
+            return res.status(401).json({ success: false, message: "Incorrect password." });
         }
     } catch (err) {
         console.log(err);
@@ -65,9 +65,81 @@ app.post("/login", async (req, res) => {
 
 
 
+app.post("/addnote", async (req, res) => {
+    try {
+        const { title, description, userId } = req.body;
+        
+        const newNote = new NoteModel({
+            title: title || "New Note",
+            description: description,
+            userId: userId,
+            x: 100,
+            y: 100
+        });
+
+        const savedNote = await newNote.save();
+        res.json({ success: true, note: savedNote });
+    } catch (err) {
+        console.error("ADD NOTE ERROR:", err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
 
 
+app.get("/getnotes/:userId",async(req,res)=>{
+  try{
+    var userId=req.params.userId;
+    var notes=await NoteModel.find({userId:userId}).sort({createdAt:-1});
+    res.json(notes);
+  }catch(err){
+        res.status(500).json({error:"failed to fetch notes"});
+  }
+});
 
+app.put("/updatenote", async (req, res) => {
+    try {
+        const { id, title, description, x, y } = req.body;
+
+        // Check if ID is a valid MongoDB ObjectId string (24 chars)
+        if (!id || id.length !== 24) {
+            return res.status(400).json({ success: false, message: "Invalid ID format" });
+        }
+
+        const updatedNote = await NoteModel.findByIdAndUpdate(
+            id,
+            { title, description, x, y },
+            { new: true }
+        );
+
+        res.json({ success: true, note: updatedNote });
+    } catch (err) {
+        console.error("Update Error:", err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.delete("/deletenote/:userId",async(req,res)=>{
+    try {
+        const noteId = req.params.userId;
+
+        
+        if (!noteId || noteId.length !== 24) {
+            return res.status(400).json({ success: false, message: "Invalid Note ID" });
+        }
+
+        
+        const deletedNote = await NoteModel.findByIdAndDelete(noteId);
+
+        if (!deletedNote) {
+            return res.status(404).json({ success: false, message: "Note not found" });
+        }
+
+        res.json({ success: true, message: "Note deleted successfully" });
+    } catch (err) {
+        console.error("Delete Error:", err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
 
 
 app.get("/",(req,res)=>{

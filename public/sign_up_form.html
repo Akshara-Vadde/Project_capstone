@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="./css/login.css">
 </head>
 
 <body>
@@ -98,6 +98,36 @@
             console.log("Username:", username);
             console.log("Password:", password);
         });
+
+
+        document.querySelector("form").addEventListener("submit", async (e) => {
+            e.preventDefault(); 
+
+            const formData = new FormData(e.target);
+            const dataObj = Object.fromEntries(formData.entries());
+
+            // 1. Manually send the login request
+            const response = await fetch("/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(dataObj)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // 2. THIS IS THE KEY: Save the ID so the sticky notes page can use it
+                localStorage.setItem("myUserId", result.userId);
+
+                // 3. Now move to the next page
+                window.location.href = result.redirectUrl;
+            } else {
+                alert("Login failed! Check your username/password.");
+            }
+        });
+
+
+
     </script>
     
 </body>
