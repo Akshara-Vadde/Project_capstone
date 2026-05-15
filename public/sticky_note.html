@@ -5,6 +5,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sticky Notes</title>
+    <script>
+        const token=localStorage.getItem("token");
+
+        if (!token) {
+            alert("Please login first!");
+            window.location.href = "sign_up_form.html";
+        }
+    </script>
 
     <link rel="stylesheet" href="./css/sticky.css">
 
@@ -21,11 +29,7 @@
     <script>
 
         const uid = localStorage.getItem("myUserId");
-
-        if (!uid) {
-            alert("Please login first!");
-            window.location.href = "sign_up_form.html";
-        }
+        
 
         const addBtn = document.getElementById("add-note");
         const container = document.getElementById("notes-container");
@@ -234,6 +238,8 @@
         }
 
         function logout() {
+            localStorage.removeItem("token");
+            localStorage.removeItem("uid");
             window.location.href = "sign_up_form.html";
         }
 

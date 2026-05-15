@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express=require("express");
+const jwt=require("jsonwebtoken");
 
 const app=express();
 var mongoose = require("mongoose");
@@ -46,8 +47,14 @@ app.post("/login", async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (isMatch) {
+            const token=jwt.sign(
+                {id:user._id},
+                "YOUR_SECRET_KEY",
+                {expiresIn:"24h"}
+            );
             res.json({
                     success: true,
+                    token:token,
                     userId: user._id,
                     redirectUrl: "/sticky_note.html"
             });

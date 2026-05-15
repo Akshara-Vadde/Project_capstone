@@ -117,7 +117,9 @@
 
             if (result.success) {
                 // 2. THIS IS THE KEY: Save the ID so the sticky notes page can use it
+                localStorage.setItem("token",result.token);
                 localStorage.setItem("myUserId", result.userId);
+
 
                 // 3. Now move to the next page
                 window.location.href = result.redirectUrl;
