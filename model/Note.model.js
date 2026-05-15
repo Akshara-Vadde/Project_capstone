@@ -15,6 +15,14 @@ var NoteSchema=mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    },
+    x: { 
+        type: Number, 
+        default: 100 
+    },
+    y: { 
+        type: Number, 
+        default: 100 
     } 
  }, {
         timestamps:true
