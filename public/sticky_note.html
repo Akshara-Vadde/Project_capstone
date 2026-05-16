@@ -22,6 +22,9 @@
 <body>
 
     <h1 class="main-title">Sticky Notes</h1>
+    <input type="text" id="search" placeholder="Search notes...">
+
+    <button id="toggle-dark"></button>
 
     <button id="add-note">➕ Add Note</button>
     <button id="lgoutbtn" onclick="logout()">Logout</button>
@@ -34,8 +37,40 @@
 
         const addBtn = document.getElementById("add-note");
         const container = document.getElementById("notes-container");
+         const searchInput = document.getElementById("search");
+        const darkBtn = document.getElementById("toggle-dark");
+        darkBtn.innerText = "🌙 Night";
 
         let notes = [];
+
+//////////////////searching in multiple notes//////////////
+         searchInput.addEventListener("input", () => {
+
+            const value = searchInput.value.toLowerCase().trim();
+
+            document.querySelectorAll(".note").forEach(note => {
+
+                const title =
+                    note.querySelector(".note-title").value.toLowerCase();
+
+                const content =
+                    note.querySelector("textarea").value.toLowerCase();
+
+                if (
+                    title.includes(value) ||
+                    content.includes(value)
+                ) {
+                    note.style.display = "block";
+                }
+                else {
+                    note.style.display = "none";
+                }
+
+            });
+
+        });
+
+
 
         async function updateNoteInDB(id, title, content, x, y, datetime) {
 
@@ -95,6 +130,19 @@
             textarea.value = content || "";
             textarea.placeholder = "Notes...";
 
+////////////////////////////
+            function autoResize() {
+
+                textarea.style.height = "auto";
+                textarea.style.height = textarea.scrollHeight + "px";
+
+                noteEl.style.height = "auto";
+            }
+
+            autoResize();
+
+
+
             const deleteBtn = document.createElement("button");
 
             deleteBtn.className = "delete";
@@ -105,6 +153,15 @@
             moveIcon.className = "move-icon";
             moveIcon.innerText = "☰";
 
+
+            //////////////////////
+
+            const infoRow = document.createElement("div");
+
+            infoRow.className = "info-row";
+
+
+
             const dateEl = document.createElement("p");
 
             dateEl.className = "dateTime";
@@ -112,11 +169,57 @@
                 ? new Date(dateTime).toLocaleString() 
                 : dateTime;
 
+
+//////////////////////count of sticky notes///////////////////
+
+
+            const counter = document.createElement("p");
+
+            counter.className = "counter";
+            counter.innerText = `${textarea.value.length}/250`;
+
+            textarea.maxLength = 250;
+
+            infoRow.appendChild(dateEl);
+            infoRow.appendChild(counter);
+
+    ////////////////copying the data in notes //////////////////
+
+            const copyBtn = document.createElement("button");
+
+            copyBtn.className = "copy-btn";
+            copyBtn.innerText = "📋 Copy";
+
+            copyBtn.addEventListener("click", async () => {
+
+                try {
+
+                    await navigator.clipboard.writeText(textarea.value);
+
+                    copyBtn.innerText = "✅ Copied";
+
+                    setTimeout(() => {
+                        copyBtn.innerText = "📋 Copy";
+                    }, 1500);
+
+                }
+                catch (err) {
+                    alert("Copy failed");
+                }
+
+            });
+
+
+
+
+
             noteEl.appendChild(titleInput);
             noteEl.appendChild(textarea);
             noteEl.appendChild(deleteBtn);
             noteEl.appendChild(moveIcon);
-            noteEl.appendChild(dateEl);
+            
+            noteEl.appendChild(infoRow);
+            noteEl.appendChild(copyBtn);
 
             container.appendChild(noteEl);
 
@@ -171,7 +274,9 @@
                 if (
                     e.target.tagName === "TEXTAREA" ||
                     e.target.tagName === "INPUT" ||
-                    e.target.className === "delete"
+                    e.target.className === "delete" ||/////////
+                    e.target.className === "copy-btn" ||
+                    e.target.className === "color-btn"
                 ) return;
 
                 offsetX = e.offsetX;
@@ -355,6 +460,21 @@
             window.location.href = "sign_up_form.html";
 
         }
+
+        //////////////////////dark-mode///////////////////////////
+         darkBtn.addEventListener("click", () => {
+
+            document.body.classList.toggle("dark-mode");
+
+            if (document.body.classList.contains("dark-mode")) {
+                darkBtn.innerText = "☀️ Light";
+            }
+            else {
+                darkBtn.innerText = "🌙 Night";
+            }
+
+        });
+
 
         fetchNotes();
 
