@@ -23,7 +23,11 @@ var NoteSchema=mongoose.Schema({
     y: { 
         type: Number, 
         default: 100 
-    } 
+    } ,
+    dateTime:{
+        type:String,
+        default:()=>new Date().toLocaleString()
+    }
  }, {
         timestamps:true
     

@@ -74,14 +74,15 @@ app.post("/login", async (req, res) => {
 
 app.post("/addnote", async (req, res) => {
     try {
-        const { title, description, userId } = req.body;
+        const { title, description, userId,dateTime } = req.body;
         
         const newNote = new NoteModel({
             title: title || "New Note",
             description: description,
             userId: userId,
             x: 100,
-            y: 100
+            y: 100,
+            dateTime:dateTime
         });
 
         const savedNote = await newNote.save();
