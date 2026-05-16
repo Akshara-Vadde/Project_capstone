@@ -254,3 +254,11 @@ body {
         font-size: 14px;
     }
 }
+
+.datetime {
+    font-size: 13px;
+    text-align: center;
+    margin-top: 8px;
+    color: #555;
+    font-family: Arial, sans-serif;
+}
