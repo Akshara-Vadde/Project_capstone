@@ -37,14 +37,14 @@
 
         const addBtn = document.getElementById("add-note");
         const container = document.getElementById("notes-container");
-         const searchInput = document.getElementById("search");
+        const searchInput = document.getElementById("search");
         const darkBtn = document.getElementById("toggle-dark");
         darkBtn.innerText = "🌙 Night";
 
         let notes = [];
 
-//////////////////searching in multiple notes//////////////
-         searchInput.addEventListener("input", () => {
+        //////////////////searching in multiple notes//////////////
+        searchInput.addEventListener("input", () => {
 
             const value = searchInput.value.toLowerCase().trim();
 
@@ -130,7 +130,7 @@
             textarea.value = content || "";
             textarea.placeholder = "Notes...";
 
-////////////////////////////
+            ////////////////////////////
             function autoResize() {
 
                 textarea.style.height = "auto";
@@ -165,12 +165,12 @@
             const dateEl = document.createElement("p");
 
             dateEl.className = "dateTime";
-            dateEl.innerText = new Date(dateTime).toLocaleString() !== "Invalid Date" 
-                ? new Date(dateTime).toLocaleString() 
+            dateEl.innerText = new Date(dateTime).toLocaleString() !== "Invalid Date"
+                ? new Date(dateTime).toLocaleString()
                 : dateTime;
 
 
-//////////////////////count of sticky notes///////////////////
+            //////////////////////count of sticky notes///////////////////
 
 
             const counter = document.createElement("p");
@@ -183,7 +183,7 @@
             infoRow.appendChild(dateEl);
             infoRow.appendChild(counter);
 
-    ////////////////copying the data in notes //////////////////
+            ////////////////copying the data in notes //////////////////
 
             const copyBtn = document.createElement("button");
 
@@ -217,7 +217,7 @@
             noteEl.appendChild(textarea);
             noteEl.appendChild(deleteBtn);
             noteEl.appendChild(moveIcon);
-            
+
             noteEl.appendChild(infoRow);
             noteEl.appendChild(copyBtn);
 
@@ -247,6 +247,8 @@
 
             textarea.addEventListener("input", () => {
 
+                autoResize();
+
                 const currentId = noteEl.dataset.id;
 
                 const idx = notes.findIndex((n) => n.id === currentId);
@@ -254,6 +256,9 @@
                 if (idx !== -1) {
 
                     notes[idx].content = textarea.value;
+
+                    // update counter
+                    counter.innerText = `${textarea.value.length}/250`;
 
                     updateNoteInDB(
                         currentId,
@@ -462,7 +467,7 @@
         }
 
         //////////////////////dark-mode///////////////////////////
-         darkBtn.addEventListener("click", () => {
+        darkBtn.addEventListener("click", () => {
 
             document.body.classList.toggle("dark-mode");
 
