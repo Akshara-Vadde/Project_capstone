@@ -23,7 +23,7 @@ app.use('/api/notes', require('./routes/noteRoutes'));
 
 
 app.get("/",(req,res)=>{
-    res.send("hamaya....")
+    res.redirect("/sign_up_form.html");
 })
 
 
