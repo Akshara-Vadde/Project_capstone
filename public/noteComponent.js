@@ -28,7 +28,7 @@ export function createNote({
             textarea.value = content || "";
             textarea.placeholder = "Notes...";
 
-            ////////////////////////////
+            
             function autoResize() {
 
                 textarea.style.height = "auto";
@@ -52,7 +52,7 @@ export function createNote({
             moveIcon.innerText = "☰";
 
 
-            //////////////////////
+            
 
             const infoRow = document.createElement("div");
 
