@@ -1,13 +1,8 @@
 require("dotenv").config();
-
 const express=require("express");
-
-
 const app=express();
 var mongoose = require("mongoose");
 var bodyParser=require("body-parser");
-
-
 var connectDB=require("./db");
 
 
